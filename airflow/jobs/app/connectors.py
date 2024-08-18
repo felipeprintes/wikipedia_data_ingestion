@@ -48,13 +48,3 @@ class S3Connector:
         with open(output_file, "w") as f:
             
             json.dump(self.landing_data, f)
-
-# if __name__=="__main__":
-#     url = 'https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/Angry_Birds/daily/20240801/20240831'
-
-#     run = HttpConnector(method='GET', url=url)
-
-
-#     result_api = run.request_data()
-#     print(result_api) 
-#     print(result_api) 
