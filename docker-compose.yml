@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  airflow:
+    image: apache/airflow:2.4.1
+    container_name: airflow
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:password@postgres/mydb
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/requirements.txt:/requirements.txt
+      - ./airflow/jobs:/jobs
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    
+    entrypoint: > 
+      bash -c "pip install -r /requirements.txt && 
+      airflow db init && 
+      airflow webserver &&
+      airflow users create \
+        --username admin \
+        --firstname Admin \
+        --lastname User \
+        --role Admin \
+        --email admin@example.com \
+        --password admin"
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  metabase:
+    image: stephaneturquay/metabase-arm64:latest
+    container_name: metabase
+    platform: linux/arm64
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: mydb
+      MB_DB_PORT: 5432
+      MB_DB_USER: postgres
+      MB_DB_PASS: password
+      MB_DB_HOST: postgres
+
+volumes:
+  postgres-data:
